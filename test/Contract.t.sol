@@ -2,14 +2,13 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-
-import "src/Contract.sol";
+import "src/FlakeETH.sol";
 
 contract TestContract is Test {
-    Contract c;
+    FlakeETH c;
 
     function setUp() public {
-        c = new Contract();
+        c = new FlakeETH();
     }
 
     function testBar() public {
