@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {
     ReentrancyGuardTransient
 } from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
@@ -13,7 +12,6 @@ import {AchievementNFT} from "./AchievementNFT.sol";
 
 contract StakingContract is
     AccessControlUpgradeable,
-    OwnableUpgradeable,
     ReentrancyGuardTransient,
     UUPSUpgradeable
 {
@@ -23,24 +21,20 @@ contract StakingContract is
     mapping(address => uint256) lastClaimBlock;
     uint256 public rewardPerBlock;
     uint256 public totalStaked;
-    FlakeETH public flakeETH;
+    FlakeETH public flakeEth;
     FlakeToken public flake;
-    AchievementNFT public achievementNFT;
+    AchievementNFT public achievementNft;
 
     function initialize(
-        address _flakeETH,
+        address _flakeEth,
         address _flake,
-        address _achievementNFT
+        address _achievementNft
     ) public initializer {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        flakeETH = FlakeETH(_flakeETH);
+        _grantRole(OWNER, msg.sender);
+        flakeEth = FlakeETH(_flakeEth);
         flake = FlakeToken(_flake);
-        achievementNFT = AchievementNFT(_achievementNFT);
+        achievementNft = AchievementNFT(_achievementNft);
         rewardPerBlock = 1e14;
-    }
-
-    function setRewardPerBlock(uint256 amount) public onlyRole(OWNER) {
-        rewardPerBlock = amount;
     }
 
     function stake(uint256 amount) external payable nonReentrant {
@@ -56,13 +50,14 @@ contract StakingContract is
             stakeTimestamp[msg.sender] = block.timestamp;
         }
 
-        flakeETH.mint(msg.sender, amount);
+        flakeEth.mint(msg.sender, amount);
 
-        if (!achievementNFT.hasAchievement(msg.sender, 1)) {
-            achievementNFT.mint(msg.sender, 1);
+        if (!achievementNft.hasAchievement(msg.sender, 1)) {
+            achievementNft.mint(msg.sender, 1);
         }
 
-        if (amount > 1 ether) achievementNFT.mint(msg.sender, 2);
+        if (!achievementNft.hasAchievement(msg.sender, 2) && amount > 1 ether)
+            achievementNft.mint(msg.sender, 2);
 
         totalStaked += amount;
     }
@@ -73,10 +68,12 @@ contract StakingContract is
             "Insufficient Balance"
         );
         flake.mint(msg.sender, pendingRewards(msg.sender));
-        flakeETH.burn(msg.sender, amount);
+        flakeEth.burn(msg.sender, amount);
         stakedAmount[msg.sender] -= amount;
-        if (block.timestamp - stakeTimestamp[msg.sender] > 7 days)
-            achievementNFT.mint(msg.sender, 3);
+        if (
+            !achievementNft.hasAchievement(msg.sender, 3) &&
+            block.timestamp - stakeTimestamp[msg.sender] > 7 days
+        ) achievementNft.mint(msg.sender, 3);
 
         if (stakedAmount[msg.sender] == 0) {
             stakeTimestamp[msg.sender] = 0;
@@ -111,7 +108,8 @@ contract StakingContract is
         returns (
             uint256 staked,
             uint256 pending,
-            uint256 stakedSince,
+            uint256 stakedBlockNum,
+            uint256 stakedTimestamp,
             bool hasGenesis,
             bool hasWhale,
             bool hasDiamondHands
@@ -119,15 +117,17 @@ contract StakingContract is
     {
         uint256 _staked = stakedAmount[user];
         uint256 _pending = pendingRewards(user);
-        uint256 _stakedSince = lastClaimBlock[user];
-        bool _hasGenesis = achievementNFT.hasAchievement(user, 1);
-        bool _hasWhale = achievementNFT.hasAchievement(user, 2);
-        bool _hasDiamondHands = achievementNFT.hasAchievement(user, 3);
+        uint256 _stakedBlockNum = lastClaimBlock[user];
+        uint256 _stakedTimestamp = stakeTimestamp[user];
+        bool _hasGenesis = achievementNft.hasAchievement(user, 1);
+        bool _hasWhale = achievementNft.hasAchievement(user, 2);
+        bool _hasDiamondHands = achievementNft.hasAchievement(user, 3);
 
         return (
             _staked,
             _pending,
-            _stakedSince,
+            _stakedBlockNum,
+            _stakedTimestamp,
             _hasGenesis,
             _hasWhale,
             _hasDiamondHands

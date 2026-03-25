@@ -12,12 +12,12 @@ contract AchievementNFT is ERC721, AccessControl {
     mapping(uint256 => uint256) private _tokenBadgeType;
     uint256 private _nextTokenId;
 
-    constructor() ERC721("Flake Achievements", "FACH") {
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    constructor(address proxyAddress) ERC721("Flake Achievements", "FACH") {
+        _grantRole(MINTER_ROLE, proxyAddress);
     }
 
     function mint(address to, uint256 badgeId) external onlyRole(MINTER_ROLE) {
-        require(badgeId >= 1 && badgeId <= 3, "Invalid Badge!");
+        require(badgeId >= 1 && badgeId <= 3, "Invalid Badge Id!");
         require(!hasAchievement[to][badgeId], "Already earned");
         hasAchievement[to][badgeId] = true;
 

@@ -1,22 +1,56 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
-import "src/FlakeETH.sol";
+import {Test} from "forge-std/Test.sol";
+import {FlakeETH} from "src/FlakeETH.sol";
 
-contract TestContract is Test {
-    FlakeETH c;
+contract FlakeEthTest is Test {
+    FlakeETH flakeEth;
+    address minter = vm.addr(1);
+    address user = vm.addr(2);
 
     function setUp() public {
-        c = new FlakeETH();
+        flakeEth = new FlakeETH(minter);
     }
 
-    function testBar() public {
-        assertEq(uint256(1), uint256(1), "ok");
+    function testMintIncreaseBalance() public { 
+        uint256 amount = 1 ether;
+        vm.prank(minter);
+        flakeEth.mint(user, amount);
+        assertEq(flakeEth.balanceOf(user), 1 ether);
     }
 
-    function testFoo(uint256 x) public {
-        vm.assume(x < type(uint128).max);
-        assertEq(x + x, x * 2);
+    function testMintUnauthorizedReverts() public {
+        uint256 amount = 1 ether;
+        vm.prank(user);
+        vm.expectRevert();
+        flakeEth.mint(user, amount);
+    }
+
+    function testBurnDecreasesBalance() public {
+        uint256 amount = 2 ether;
+        vm.startPrank(minter);
+        flakeEth.mint(user, amount);
+        flakeEth.burn(user, amount / 2);
+        assertEq(flakeEth.balanceOf(user), 1 ether);
+    }
+
+    function testBurnUnauthorizedReverts() public {
+        uint256 amount = 1 ether;
+        vm.prank(minter);
+        flakeEth.mint(user, amount);
+
+        vm.prank(user);
+        vm.expectRevert();
+        flakeEth.burn(user, amount);
+    }
+
+    function testBurnMoreThanBalance() public {
+        uint256 amount = 1 ether;
+        vm.startPrank(minter);
+        flakeEth.mint(user, amount);
+        vm.expectRevert();
+        flakeEth.burn(user, amount + 1);
+        vm.stopPrank();
     }
 }
