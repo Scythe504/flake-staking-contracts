@@ -17,6 +17,11 @@ contract StakingContract is
 {
     bytes32 public constant OWNER = keccak256("OWNER");
 
+    event Staked(address indexed user, uint256 amount);
+    event Unstaked(address indexed user, uint256 amount);
+    event RewardsClaimed(address indexed user, uint256 amount);
+    event RewardRateUpdated(uint256 newRate);
+
     struct UserInfo {
         uint256 amount;
         uint64 lastClaimBlock;
@@ -55,7 +60,10 @@ contract StakingContract is
 
         if (user.amount > 0) {
             uint256 rewards = _calculatePendingRewards(user);
-            if (rewards > 0) flake.mint(msg.sender, rewards);
+            if (rewards > 0) {
+                flake.mint(msg.sender, rewards);
+                emit RewardsClaimed(msg.sender, rewards);
+            }
         }
 
         user.lastClaimBlock = uint64(block.number);
@@ -78,6 +86,7 @@ contract StakingContract is
         }
 
         totalStaked += amount;
+        emit Staked(msg.sender, amount);
     }
 
     function unstake(uint256 amount) external nonReentrant {
@@ -85,7 +94,10 @@ contract StakingContract is
         require(amount > 0 && amount <= user.amount, "Insufficient Balance");
 
         uint256 rewards = _calculatePendingRewards(user);
-        if (rewards > 0) flake.mint(msg.sender, rewards);
+        if (rewards > 0) {
+            flake.mint(msg.sender, rewards);
+            emit RewardsClaimed(msg.sender, rewards);
+        }
 
         flakeEth.burn(msg.sender, amount);
         user.amount -= amount;
@@ -108,13 +120,17 @@ contract StakingContract is
         totalStaked -= amount;
         (bool success, ) = payable(msg.sender).call{value: amount}("");
         require(success, "Transfer Failed");
+        emit Unstaked(msg.sender, amount);
     }
 
     function claimRewards() external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
         uint256 rewards = _calculatePendingRewards(user);
         user.lastClaimBlock = uint64(block.number);
-        if (rewards > 0) flake.mint(msg.sender, rewards);
+        if (rewards > 0) {
+            flake.mint(msg.sender, rewards);
+            emit RewardsClaimed(msg.sender, rewards);
+        }
     }
 
     function pendingRewards(address userAddr) public view returns (uint256) {
@@ -159,6 +175,7 @@ contract StakingContract is
 
     function setRewardRate(uint256 _rate) external onlyRole(OWNER) {
         rewardPerBlock = _rate;
+        emit RewardRateUpdated(_rate);
     }
 
     function _authorizeUpgrade(
