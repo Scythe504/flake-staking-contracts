@@ -13,21 +13,21 @@ contract FlakeEthTest is Test {
         flakeEth = new FlakeETH(minter);
     }
 
-    function testMintIncreaseBalance() public { 
+    function test_Mint_IncreasesBalance() public { 
         uint256 amount = 1 ether;
         vm.prank(minter);
         flakeEth.mint(user, amount);
         assertEq(flakeEth.balanceOf(user), 1 ether);
     }
 
-    function testMintUnauthorizedReverts() public {
+    function test_RevertIf_MintUnauthorized() public {
         uint256 amount = 1 ether;
         vm.prank(user);
         vm.expectRevert();
         flakeEth.mint(user, amount);
     }
 
-    function testBurnDecreasesBalance() public {
+    function test_Burn_DecreasesBalance() public {
         uint256 amount = 2 ether;
         vm.startPrank(minter);
         flakeEth.mint(user, amount);
@@ -35,7 +35,7 @@ contract FlakeEthTest is Test {
         assertEq(flakeEth.balanceOf(user), 1 ether);
     }
 
-    function testBurnUnauthorizedReverts() public {
+    function test_RevertIf_BurnUnauthorized() public {
         uint256 amount = 1 ether;
         vm.prank(minter);
         flakeEth.mint(user, amount);
@@ -45,7 +45,7 @@ contract FlakeEthTest is Test {
         flakeEth.burn(user, amount);
     }
 
-    function testBurnMoreThanBalance() public {
+    function test_RevertIf_BurnMoreThanBalance() public {
         uint256 amount = 1 ether;
         vm.startPrank(minter);
         flakeEth.mint(user, amount);

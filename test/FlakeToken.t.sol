@@ -13,14 +13,14 @@ contract FlakeTokenTest is Test {
         flakeToken = new FlakeToken(minter);
     }
 
-    function testMintIncreaseBalance() public { 
+    function test_Mint_IncreasesBalance() public { 
         uint256 amount = 1 ether;
         vm.prank(minter);
         flakeToken.mint(user, amount);
         assertEq(flakeToken.balanceOf(user), 1 ether);
     }
 
-    function testMintUnauthorizedReverts() public {
+    function test_RevertIf_MintUnauthorized() public {
         uint256 amount = 1 ether;
         vm.prank(user);
         vm.expectRevert();

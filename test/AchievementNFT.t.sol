@@ -13,7 +13,7 @@ contract AchievementNftTest is Test {
         achievementNft = new AchievementNFT(minter);
     }
 
-    function testMintGrantsBadges() public {
+    function test_Mint_GrantsBadges() public {
         vm.startPrank(minter);
         achievementNft.mint(user, 1);
         achievementNft.mint(user, 2);
@@ -24,7 +24,7 @@ contract AchievementNftTest is Test {
         assertTrue(achievementNft.hasAchievement(user, 3));
     }
 
-    function testMintIncrementsTokenId() public {
+    function test_Mint_IncrementsTokenId() public {
         vm.startPrank(minter);
         achievementNft.mint(user, 1);
         achievementNft.mint(user, 2);
@@ -33,7 +33,7 @@ contract AchievementNftTest is Test {
         assertEq(achievementNft.ownerOf(1), user);
     }
 
-    function testMintDuplicateBadgeReverts() public {
+    function test_RevertIf_MintDuplicateBadge() public {
         vm.startPrank(minter);
         achievementNft.mint(user, 1);
         vm.expectRevert("Already earned");
@@ -41,13 +41,13 @@ contract AchievementNftTest is Test {
         vm.stopPrank();
     }
 
-    function testMintUnauthorizedReverts() public {
+    function test_RevertIf_MintUnauthorized() public {
         vm.prank(user);
         vm.expectRevert();
         achievementNft.mint(user, 1);
     }
 
-    function testMintInvalidBadgeReverts() public {
+    function test_RevertIf_MintInvalidBadge() public {
         vm.startPrank(minter);
         vm.expectRevert("Invalid Badge Id!");
         achievementNft.mint(user, 0);
@@ -57,12 +57,12 @@ contract AchievementNftTest is Test {
         vm.stopPrank();
     }
 
-    function testTokenURIRevertsForNonExistentToken() public {
+    function test_RevertIf_TokenURINonExistentToken() public {
         vm.expectRevert();
         achievementNft.tokenURI(999);
     }
 
-    function testTokenURIReturnsDataForValidToken() public {
+    function test_TokenURI_ReturnsDataForValidToken() public {
         vm.prank(minter);
         achievementNft.mint(user, 1);
 
@@ -71,6 +71,22 @@ contract AchievementNftTest is Test {
         // just assert it starts with the expected prefix
         assertTrue(bytes(uri).length > 0, "URI should not be empty");
         assertEq(_substring(uri, 0, 29), "data:application/json;base64,");
+    }
+
+    function test_TokenURI_DifferentForBadges() public {
+        vm.startPrank(minter);
+        achievementNft.mint(user, 1);
+        achievementNft.mint(user, 2);
+        achievementNft.mint(user, 3);
+        vm.stopPrank();
+
+        string memory uri1 = achievementNft.tokenURI(0);
+        string memory uri2 = achievementNft.tokenURI(1);
+        string memory uri3 = achievementNft.tokenURI(2);
+
+        assertTrue(keccak256(bytes(uri1)) != keccak256(bytes(uri2)), "URI 1 and 2 should differ");
+        assertTrue(keccak256(bytes(uri2)) != keccak256(bytes(uri3)), "URI 2 and 3 should differ");
+        assertTrue(keccak256(bytes(uri1)) != keccak256(bytes(uri3)), "URI 1 and 3 should differ");
     }
 
     // helper
