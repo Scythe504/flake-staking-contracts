@@ -48,7 +48,7 @@ Soulbound ERC-721 badges with IPFS-linked artwork, awarded at staking milestones
 | Contract | Address |
 |:---------|:--------|
 | **Main Proxy** *(interact here)* | `0xf774f60C1418576f2FF1E92dF6a01910b336702d` |
-| **sbFlakeETH** | `0x1C13Cd67dBEb01C24ded06322131cc5a83d9CA5E` |
+| **Flake sbETH** | `0x1C13Cd67dBEb01C24ded06322131cc5a83d9CA5E` |
 | **$FLAKE Token** | `0x6c6e775F1FF9C26B063beD050D45BF7ac424e533` |
 | **Achievement NFT** | `0x0aCC39977CD78129a77a209bf9B39C5Ee1C4a68F` |
 | **Implementation** | `0x41a309131A7903c967DF70A94DbA048ee842C2DA` |
@@ -58,7 +58,7 @@ Soulbound ERC-721 badges with IPFS-linked artwork, awarded at staking milestones
 | Contract | Address |
 |:---------|:--------|
 | **Main Proxy** *(interact here)* | `0xf774f60C1418576f2FF1E92dF6a01910b336702d` |
-| **sbFlakeETH** | `0xA917Aa70d9538c4fC4B6653037f51C0EBCe56652` |
+| **Flake sbETH** | `0xA917Aa70d9538c4fC4B6653037f51C0EBCe56652` |
 | **$FLAKE Token** | `0x6c6e775F1FF9C26B063beD050D45BF7ac424e533` |
 | **Achievement NFT** | `0x41a309131A7903c967DF70A94DbA048ee842C2DA` |
 | **Implementation** | `0xdcd4Bee9556A5D545FC6bB603264515b2385Ba2a` |
