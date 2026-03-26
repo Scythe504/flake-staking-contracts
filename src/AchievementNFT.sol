@@ -24,7 +24,10 @@ contract AchievementNFT is ERC721, AccessControl {
         _grantRole(MINTER_ROLE, proxyAddress);
     }
 
-    function setBadgeCID(uint256 badgeId, string calldata cid) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBadgeCID(
+        uint256 badgeId,
+        string calldata cid
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(badgeId >= 1 && badgeId <= 3, "Invalid Badge Id");
         badgeCID[badgeId] = cid;
     }
@@ -47,7 +50,7 @@ contract AchievementNFT is ERC721, AccessControl {
 
         uint256 badgeId = _tokenBadgeType[tokenId];
         string memory name;
-        
+
         if (badgeId == 1) {
             name = "Genesis Staker";
         } else if (badgeId == 2) {
@@ -76,6 +79,19 @@ contract AchievementNFT is ERC721, AccessControl {
                     Base64.encode(bytes(json))
                 )
             );
+    }
+
+    function _update(
+        address to,
+        uint256 tokenId,
+        address auth
+    ) internal override returns (address) {
+        address from = _ownerOf(tokenId);
+        if (from != address(0) && to != address(0)) {
+            revert("Achievements are Soulbound and non-transferable");
+        }
+
+        return super._update(to, tokenId, auth);
     }
 
     function supportsInterface(

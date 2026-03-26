@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {
+    AccessControlUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {
+    UUPSUpgradeable
+} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {
     ReentrancyGuardTransient
 } from "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
@@ -142,8 +146,9 @@ contract StakingContract is
     ) internal view returns (uint256) {
         if (user.amount == 0 || user.lastClaimBlock == 0) return 0;
         return
-            (user.amount * (block.number - user.lastClaimBlock) * rewardPerBlock) /
-            1e18;
+            (user.amount *
+                (block.number - user.lastClaimBlock) *
+                rewardPerBlock) / 1e18;
     }
 
     function getStakeInfo(
@@ -176,6 +181,16 @@ contract StakingContract is
     function setRewardRate(uint256 _rate) external onlyRole(OWNER) {
         rewardPerBlock = _rate;
         emit RewardRateUpdated(_rate);
+    }
+
+    function setTokenAddresses(
+        address _flakeEth,
+        address _flake,
+        address _achievementNft
+    ) external onlyRole(OWNER) {
+        flakeEth = FlakeETH(_flakeEth);
+        flake = FlakeToken(_flake);
+        achievementNft = AchievementNFT(_achievementNft);
     }
 
     function _authorizeUpgrade(
