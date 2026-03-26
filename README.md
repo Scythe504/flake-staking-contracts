@@ -12,7 +12,7 @@ Stake ETH, receive sbFlakeETH as a 1:1 soulbound receipt, earn $FLAKE rewards, a
 Stake ETH
     │
     ▼
-Receive sbFlakeETH  (Soulbound ERC-20, 1:1)
+Receive Flake sbETH  (Soulbound ERC-20, 1:1)
     │
     ▼
 Earn $FLAKE rewards  (ERC-20, transferable)
